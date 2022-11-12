@@ -37,15 +37,15 @@ console.log(`pokeapi_response: ${pokeapi_response}`); // pokeapi_response is a P
 var id = pokeapi_obj.id;
 var _name = pokeapi_obj.name;
 console.log(`_name: ${_name}`);
-var sprites = pokeapi_obj.sprites; // sprites is undefined
-var sprites_other_official_artwork = sprites.other["official-artwork"];
+// var sprites = pokeapi_obj.sprites; // sprites is undefined
+// var sprites_other_official_artwork = sprites.other["official-artwork"];
 
 var html_body = document.getElementById("container1"); // html_body is null
 // `string` = template literal, template string
 var node = html_body.appendChild(document.createElement('h1')); // argument 1 is not an object, https://stackoverflow.com/questions/38277713/argument-1-of-node-appendchild-is-not-an-object-when-trying-to-append-basic-html
 var content = document.createTextNode(`Pokemon ${id}: ${_name}`);
 node.appendChild(content);
-html_body.appendChild(document.createElement('img'));
+tml_body.appendChild(document.createElement('img'));
 
 // <img src="pic_trulli.jpg" alt="Italian Trulli">
 
@@ -81,14 +81,20 @@ doSomething(function (result) {
         let id = data.id;
         let _name = data.name;
         let sprites = data.sprites;
-        let sprites_other_official_artwork = sprites.other["official-artwork"];
+        let sprites_other_official_artwork = sprites.other["official-artwork"].front_default; // [object Object]
+        console.log(`artwork data: ${sprites_other_official_artwork}` );
         html_body = document.getElementById("container1"); // html_body is null
         // `string` = template literal, template string
         let node = html_body.appendChild(document.createElement('h1')); // argument 1 is not an object, https://stackoverflow.com/questions/38277713/argument-1-of-node-appendchild-is-not-an-object-when-trying-to-append-basic-html
         let content = document.createTextNode(`Pokemon ${id}: ${_name}`);
         node.appendChild(content);
-
+        img = document.createElement('img');
+        // <img src="pic_trulli.jpg" alt="Italian Trulli"></img>
+        img.src = sprites_other_official_artwork;
+        node.appendChild(img);
+        // content = document.createTextNode(`<img src=\"${sprites_other_official_artwork}\" alt="Image of Pokemon" >`);
         
+
         // response = data;
     } ); //.then().then() is a promise chain
     
