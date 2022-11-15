@@ -1,3 +1,4 @@
+"use strict";
 // RUN
 printPageTitle("Pokedex");
 
@@ -6,17 +7,22 @@ printPageTitle("Pokedex");
 
 // these variables can be referred to in the console (F12)
 const localhost_url = "http://localhost";
-const port = 8000;
-const localhost_port_url = localhost_url + `:${port}`;
+const default_port = 8000;
+const localhost_port_url = localhost_url + `:${default_port}`;
 const localhost_pokeapi_url = localhost_port_url + "/api/v2";
 const localhost_pokeapi_pokemon_url = localhost_port_url + "/api/v2/pokemon/";
+
 const pokeapi_url = "https://pokeapi.co/api/v2/";
 // "https://pokeapi.co/api/v2/pokemon/{id or name}/";\
 const pokeapi_pokemon_url = "https://pokeapi.co/api/v2/pokemon/";
+
 const maxDexNumber = 905;
+const pseudoLegendaries = ["dragonite", "tyranitar", "salamence", "metagross", "garchomp", "hydreigon", "goodra", "kommo-o", "dragapult"];
+
 const pokeapi_pokemon_tyranitar_url = "https://pokeapi.co/api/v2/pokemon/tyranitar/";
 const localhost_pokemon_hydreigon_url = "http://localhost:8000/api/v2/pokemon/hydreigon/";
 
+// Refer to promisifying functions
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 // FUNCTION //
@@ -48,7 +54,7 @@ function fetchPokemonToButton(node_id){
         dex_number = 1;
     }
     console.log(`Trying to fetch to pokemon [${dex_number}]`);
-    main();
+    // main();
     fetchPokemonTo(dex_number);
 
 }
@@ -176,7 +182,8 @@ function renderJSON(data) {
     let types = data.types;
     let sprites = data.sprites;
     let sprites_other_official_artwork = sprites.other["official-artwork"].front_default; // [object Object]
-    
+    let img;
+
     console.log(`artwork data: ${sprites_other_official_artwork}` );
     
     body1 = document.getElementById("body1");
@@ -186,9 +193,9 @@ function renderJSON(data) {
     // `string` = template literal, template string
     // Name
     let node = container1.appendChild(document.createElement('h1')); // argument 1 is not an object, https://stackoverflow.com/questions/38277713/argument-1-of-node-appendchild-is-not-an-object-when-trying-to-append-basic-html
-    let pokemon_name = document.createTextNode(`Pokemon [${id}]: ${_name}`);
+    let pokemon_id = document.createTextNode(`Pokemon [${id}]: ${_name}`);
     
-    node.appendChild(pokemon_name);
+    node.appendChild(pokemon_id);
     node.appendChild(document.createElement('br'));
     
     // Picture
@@ -202,9 +209,45 @@ function renderJSON(data) {
     types.forEach(function(element, index, array) {
         console.log(element.type);
         console.log(index);
-        
+        console.log(element.type.name);
         // node.appendChild()
     })
+}
+
+function createAPISourceOptions(html_node_id) {
+    // refer: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/radio
+    let node = document.getElementById(html_node_id);
+    let br = document.createElement('br');
+    let title = document.createElement('p');
+    let input_node = document.createElement('input');
+    let label_node = document.createElement('label');
+    node.innerHTML = ""; // reset
+
+    title.textContent = "API source: ";
+
+    input_node.type = "radio";
+    input_node.id = "localhost";
+    input_node.name = "api_source"; // define radio group: giving each of radio buttons in the group the same name 
+    input_node.checked = true; // sets button selected by default
+    
+    label_node.htmlFor = "localhost"; // To programmatically set the for attribute, use htmlFor.
+    label_node.textContent = "localhost";
+    
+    node.appendChild(title);
+    node.appendChild(input_node);
+    node.appendChild(label_node);
+    node.appendChild(br);
+    
+    input_node = document.createElement('input');
+    input_node.type = "radio";
+    input_node.id = "pokeapi";
+    input_node.name = "api_source";
+    node.appendChild(input_node);
+    
+    label_node = document.createElement('label');
+    label_node.htmlFor ="pokeapi";
+    label_node.textContent = "pokeapi";
+    node.appendChild(label_node);
 }
 
 // Math.random() returns a floating point pseudo-random number where 0 < x < 1
@@ -232,7 +275,7 @@ function clearHTML(node) {
 }
 
 function clearNodeById(Id) {
-    
+    let node;
     console.log(`Clearing node ID: ${Id}`);
     node = document.getElementById(Id);
     node.innerHTML = "";
