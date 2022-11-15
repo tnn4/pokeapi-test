@@ -8,15 +8,26 @@
     <link rel="stylesheet" href="style.css">
   </head>
 
-  <body>
+  <body id="body1">
 	  <div id="title"></div>
     Press F12 to open developer console.
+    <br>
+    Type main() in the Console to start.
+    <br>
+    Type clear() to clear the Console.
+    <br>
+    <button onclick="main()">Click this to get Random Pokemon</button>
+
     <form>
       <br>
-      <label for="pokemon_input">Enter pokemon or number [1-650]</label>
-      <input id="pokemon_input" type="text">
+      <label for="input_number">Enter number [1-905]</label>
+      <input id="input_number" type="text">
+      <button onclick="fetchPokemonToButton('input_number')">Get Pokemon</button> <!--THIS WAS THE PROBLEM-->
     </form>
-    
+    <br>
+    <button onclick="fetchPokemonToButton('input_number')">Get Pokemon</button>
+    <br>
+    <button onclick="fetchPokemonTo(2)">Get Pokemon 2</button>
     <div id="container1"></div>
     <script src="fetch.js"></script>
   </body>
