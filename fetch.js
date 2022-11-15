@@ -28,7 +28,7 @@ const api_url = [localhost_pokeapi_url, pokeapi_url];
 // Refer to promisifying functions
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-var base_api_url;
+var selected_api_url = pokeapi_pokemon_url;
 
 // RUN
 main();
@@ -53,7 +53,7 @@ function main() {
 
     printPageTitle(page_title);
     createAPISourceOptions("api_source");
-    getAPISourceOptions("api_source");
+    getAPISourceChoice("api_source");
 
     clearNodeById("container1");
 
@@ -65,11 +65,24 @@ function main() {
 function fetchPokemonButton() {
     let selected_button;
     let selected_api;
+    let selected_pokemon;
+    let url_to_fetch;
     // get api source
-    selected_button = getAPISourceOptions("api_source");
-    selected_api = selectAPISource(selected_button);
-    console.log(`selected_api: ${selected_api}`);
+    selected_button = getAPISourceChoice("api_source");
+    // selected_api = selectAPISource(selected_button);
+    // console.log(`selected_api: ${selected_api}`);
+    
     // fetch pokemon from source
+    // fetchPokeapiResponse(url);
+    selected_pokemon = document.getElementById("selected_pokemon").value;
+    console.log(`selected_pokemon: ${selected_pokemon}`);
+    if (selected_pokemon === "" || selected_pokemon === undefined || selected_pokemon === null) {
+        fetchRandomPokemon();
+        return;
+    }
+    url_to_fetch = selected_api_url + selected_pokemon;
+    console.log(`url_to_fetch: ${url_to_fetch}`);
+    fetchPokeapiResponse(url_to_fetch);
 }
 
 function fetchRandomPokemon() {
@@ -228,8 +241,8 @@ function createAPISourceOptions(html_node_id) {
     input_node.checked = true; // sets button selected by default
     input_node.onclick = () => {
         console.log('radio button 1 clicked!');
-        base_api_url = localhost_pokeapi_url;
-        console.log(`Set api source to: ${base_api_url}`);
+        selected_api_url = localhost_pokeapi_url;
+        console.log(`Set api source to: ${selected_api_url}`);
     }
     label_node.htmlFor = "localhost"; // To programmatically set the for attribute, use htmlFor.
     label_node.textContent = "localhost";
@@ -243,10 +256,10 @@ function createAPISourceOptions(html_node_id) {
     input_node.type = "radio";
     input_node.id = "pokeapi";
     input_node.name = "api_source";
-    input_node.onclick = () => {
+    input_node.onclick = function testRadio(){ // Function expressions in JavaScript are not hoisted, unlike function declarations. You can't use function expressions before you create them: 
         console.log('radio button 2 clicked!');
-        base_api_url = pokeapi_url;
-        console.log(`Set api source to: ${base_api_url}`);
+        selected_api_url = pokeapi_url;
+        console.log(`Set api source to: ${selected_api_url}`);
     }
     node.appendChild(input_node);
     
@@ -256,7 +269,7 @@ function createAPISourceOptions(html_node_id) {
     node.appendChild(label_node);
 }
 
-function getAPISourceOptions(name) {
+function getAPISourceChoice(name) {
     let ele = document.getElementsByName(name);
     let selected_button;
     //let node;
