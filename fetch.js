@@ -1,17 +1,10 @@
 "use strict";
-// RUN
-printPageTitle("Pokedex");
-createAPISourceOptions("api_source");
-getAPISourceOptions("api_source");
-/*
-setTimeout(() => {
-    document.location.reload();
-  }, 5000);
-*/ 
+
 
 // DATA
 
 // these variables can be referred to in the console (F12)
+const page_title = "Pokeapi"
 const localhost_url = "http://localhost";
 const default_port = 8000;
 const localhost_port_url = localhost_url + `:${default_port}`;
@@ -35,6 +28,17 @@ const api_url = [localhost_pokeapi_url, pokeapi_url];
 // Refer to promisifying functions
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+var base_api_url;
+
+// RUN
+main();
+
+/*
+setTimeout(() => {
+    document.location.reload();
+  }, 5000);
+*/ 
+
 // FUNCTION //
 
 function main() {
@@ -43,9 +47,14 @@ function main() {
 
     // Figure out how to cache responses
     let pokeapi_response;
-    let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(650);
-    let localhost_pokemon_random_url = localhost_pokeapi_url + "/pokemon" + `/${getRandomInt(650)}`;
+    let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(maxDexNumber);
+    let localhost_pokemon_random_url = localhost_pokeapi_url + "/pokemon" + `/${getRandomInt(maxDexNumber)}`;
     let url_to_fetch;
+
+    printPageTitle(page_title);
+    createAPISourceOptions("api_source");
+    getAPISourceOptions("api_source");
+
     clearNodeById("container1");
 
     pokeapi_response = fetchPokeapiResponse(localhost_pokemon_random_url);
@@ -53,7 +62,17 @@ function main() {
     console.log( "typeof pokeapi_response: " + typeof pokeapi_response );
 }
 
-function fetchRandomPokemon(){
+function fetchPokemonButton() {
+    let selected_button;
+    let selected_api;
+    // get api source
+    selected_button = getAPISourceOptions("api_source");
+    selected_api = selectAPISource(selected_button);
+    console.log(`selected_api: ${selected_api}`);
+    // fetch pokemon from source
+}
+
+function fetchRandomPokemon() {
     let pokeapi_response;
     let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(maxDexNumber);
     let localhost_pokemon_random_url = localhost_pokeapi_url + "/pokemon" + `/${getRandomInt(maxDexNumber)}`;
@@ -201,13 +220,17 @@ function createAPISourceOptions(html_node_id) {
     let label_node = document.createElement('label');
     node.innerHTML = ""; // reset
 
-    title.textContent = "API source: ";
+    title.textContent = "API source (use pokeapi if you are not running a local server): ";
 
     input_node.type = "radio";
     input_node.id = "localhost";
     input_node.name = "api_source"; // define radio group: giving each of radio buttons in the group the same name 
     input_node.checked = true; // sets button selected by default
-    
+    input_node.onclick = () => {
+        console.log('radio button 1 clicked!');
+        base_api_url = localhost_pokeapi_url;
+        console.log(`Set api source to: ${base_api_url}`);
+    }
     label_node.htmlFor = "localhost"; // To programmatically set the for attribute, use htmlFor.
     label_node.textContent = "localhost";
     
@@ -220,6 +243,11 @@ function createAPISourceOptions(html_node_id) {
     input_node.type = "radio";
     input_node.id = "pokeapi";
     input_node.name = "api_source";
+    input_node.onclick = () => {
+        console.log('radio button 2 clicked!');
+        base_api_url = pokeapi_url;
+        console.log(`Set api source to: ${base_api_url}`);
+    }
     node.appendChild(input_node);
     
     label_node = document.createElement('label');
@@ -231,19 +259,21 @@ function createAPISourceOptions(html_node_id) {
 function getAPISourceOptions(name) {
     let ele = document.getElementsByName(name);
     let selected_button;
-    let node;
+    //let node;
+    //let node2;
     for (let i = 0; i<ele.length; i++) {
         if (ele[i].checked){
-            console.log(`selected object: ${ele[i]}`);
-            node = document.getElementById("api_source").appendChild(document.createElement('p'));
-            node.textContent = `selected api source: ${ele[i].id}`;
+            
             selected_button = ele[i].id;
         }
     }
+    console.log(`selected object: ${selected_button}`);
+
+
     return selected_button;
 }
 
-function checkAPISource(source){
+function selectAPISource(source){
     if (source === "localhost") {
         return localhost_url;
     }
