@@ -1,7 +1,13 @@
 "use strict";
 // RUN
 printPageTitle("Pokedex");
-
+createAPISourceOptions("api_source");
+getAPISourceOptions("api_source");
+/*
+setTimeout(() => {
+    document.location.reload();
+  }, 5000);
+*/ 
 
 // DATA
 
@@ -9,7 +15,9 @@ printPageTitle("Pokedex");
 const localhost_url = "http://localhost";
 const default_port = 8000;
 const localhost_port_url = localhost_url + `:${default_port}`;
+
 const localhost_pokeapi_url = localhost_port_url + "/api/v2";
+
 const localhost_pokeapi_pokemon_url = localhost_port_url + "/api/v2/pokemon/";
 
 const pokeapi_url = "https://pokeapi.co/api/v2/";
@@ -21,6 +29,8 @@ const pseudoLegendaries = ["dragonite", "tyranitar", "salamence", "metagross", "
 
 const pokeapi_pokemon_tyranitar_url = "https://pokeapi.co/api/v2/pokemon/tyranitar/";
 const localhost_pokemon_hydreigon_url = "http://localhost:8000/api/v2/pokemon/hydreigon/";
+
+const api_url = [localhost_pokeapi_url, pokeapi_url];
 
 // Refer to promisifying functions
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -35,11 +45,22 @@ function main() {
     let pokeapi_response;
     let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(650);
     let localhost_pokemon_random_url = localhost_pokeapi_url + "/pokemon" + `/${getRandomInt(650)}`;
+    let url_to_fetch;
     clearNodeById("container1");
 
     pokeapi_response = fetchPokeapiResponse(localhost_pokemon_random_url);
     
     console.log( "typeof pokeapi_response: " + typeof pokeapi_response );
+}
+
+function fetchRandomPokemon(){
+    let pokeapi_response;
+    let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(maxDexNumber);
+    let localhost_pokemon_random_url = localhost_pokeapi_url + "/pokemon" + `/${getRandomInt(maxDexNumber)}`;
+    let url_to_fetch;
+    clearNodeById("container1");
+
+    pokeapi_response = fetchPokeapiResponse(localhost_pokemon_random_url);
 }
 
 function fetchPokemonToButton(node_id){
@@ -87,49 +108,6 @@ function fetchPokemonTo(dex_number) {
     */
 }
 
-function fetchPokeapiResponse2( pokemon_url ) {
-    
-    if (pokemon_url.slice(-1) !== "/") {
-        pokemon_url = pokemon_url + "/";
-    }
-
-    const requestOptions = {
-        //mode: "no-cors",
-    }
-    
-    console.log(`attempting to fetch from: ${pokemon_url}`);
-
-    // response object contains a representation of the entire HTTP response
-    // that is why you have to access its json method
-    // then returns a promise
-    // refer to using promises:
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises
-    // a promise is a returned object to which you attach callbacks
-    // you can rewrite promise chains with async functions
-    // () => x is short for () => {return x; }
-    fetch( pokemon_url )
-        .then( (response) => {
-            console.log(`Response: ${response}`);
-            console.log(`response status: ${response.status}`);
-            return response.json(); // WRONG response.json(); RIGHT return response.json() <-- this needs to be returned
-            /*
-            Normally, you do something like this:
-
-            fetch(...).then(r => r.json()).then(console.log);
-
-            which implicitly returns r.json(), but since you're using () => { ... }, you need to explicitly return. 
-            */
-        })
-        .then( (data) => {
-            renderJSON(data);
-        })
-        .catch( (error) => {
-            console.error(`${error}`);
-            //console.error({error});
-        }); //.then().then() is a promise chain
-    
-    // return response; WRONG You want to return the previous object, https://stackoverflow.com/questions/50607760/reactjs-typeerror-object-is-undefined
-}
 // REMEMBER promises are always async
 function fetchPokeapiResponse( pokemon_url ) {
     /*
@@ -209,7 +187,7 @@ function renderJSON(data) {
     types.forEach(function(element, index, array) {
         console.log(element.type);
         console.log(index);
-        console.log(element.type.name);
+        console.log(`type: ${element.type.name}`);
         // node.appendChild()
     })
 }
@@ -248,6 +226,30 @@ function createAPISourceOptions(html_node_id) {
     label_node.htmlFor ="pokeapi";
     label_node.textContent = "pokeapi";
     node.appendChild(label_node);
+}
+
+function getAPISourceOptions(name) {
+    let ele = document.getElementsByName(name);
+    let selected_button;
+    let node;
+    for (let i = 0; i<ele.length; i++) {
+        if (ele[i].checked){
+            console.log(`selected object: ${ele[i]}`);
+            node = document.getElementById("api_source").appendChild(document.createElement('p'));
+            node.textContent = `selected api source: ${ele[i].id}`;
+            selected_button = ele[i].id;
+        }
+    }
+    return selected_button;
+}
+
+function checkAPISource(source){
+    if (source === "localhost") {
+        return localhost_url;
+    }
+    else if (source === "pokeapi") {
+        return pokeapi_url;
+    }
 }
 
 // Math.random() returns a floating point pseudo-random number where 0 < x < 1
