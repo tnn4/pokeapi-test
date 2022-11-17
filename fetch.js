@@ -6,14 +6,14 @@
 // these variables can be referred to in the console (F12)
 const page_title = "Pokeapi"
 const localhost_url = "http://localhost";
-const default_port = 8000;
-const localhost_port_url = localhost_url + `:${default_port}`;
+const selected_port = 8000;
+const localhost_port_url = localhost_url + `:${selected_port}`;
 
 const localhost_pokeapi_url = localhost_port_url + "/api/v2";
 
 const localhost_pokeapi_pokemon_url = localhost_port_url + "/api/v2/pokemon/";
 
-const pokeapi_url = "https://pokeapi.co/api/v2/";
+const pokeapi_url = "https://pokeapi.co/api/v2";
 // "https://pokeapi.co/api/v2/pokemon/{id or name}/";\
 const pokeapi_pokemon_url = "https://pokeapi.co/api/v2/pokemon/";
 
@@ -24,20 +24,34 @@ const pokeapi_pokemon_tyranitar_url = "https://pokeapi.co/api/v2/pokemon/tyranit
 const localhost_pokemon_hydreigon_url = "http://localhost:8000/api/v2/pokemon/hydreigon/";
 
 const api_url = [localhost_pokeapi_url, pokeapi_url];
+const type_color = {
+    normal: 'a8a878',
+    fighting: 'c03028',
+    ground: 'e0c068',
+    rock: 'ba8038',
+    steel: 'b8b8d0',
+    fire: 'f08030',
+    water: '6890f0',
+    grass: '78c850',
+    electric: 'f8d030',
+    ice: '98d8d8',
+    flying: 'a890f0',
+    bug: 'a8b820',
+    poison: 'a040a0',
+    ghost: '705898',
+    psychic: 'f85888',
+    dark: '705848',
+    fairy: 'ee99ac',
+    dragon: '7038f8'
+}
 
 // Refer to promisifying functions
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-var selected_api_url = pokeapi_pokemon_url;
+var selected_api_url = localhost_pokeapi_url;
 
 // RUN
 main();
-
-/*
-setTimeout(() => {
-    document.location.reload();
-  }, 5000);
-*/ 
 
 // FUNCTION //
 
@@ -63,6 +77,8 @@ function main() {
 }
 
 function fetchPokemonButton() {
+    // debounce
+    
     let selected_button;
     let selected_api;
     let selected_pokemon;
@@ -80,7 +96,7 @@ function fetchPokemonButton() {
         fetchRandomPokemon();
         return;
     }
-    url_to_fetch = selected_api_url + selected_pokemon;
+    url_to_fetch = selected_api_url + '/pokemon' + '/' + selected_pokemon;
     console.log(`url_to_fetch: ${url_to_fetch}`);
     fetchPokeapiResponse(url_to_fetch);
 }
@@ -186,26 +202,30 @@ function fetchPokeapiResponse( pokemon_url ) {
 
 function renderJSON(data) {
     console.log("data: " + data);
-        
+    console.log(`== Successfully retrieved: ${data.name.toUpperCase()} ==`);
+    
     let id = data.id;
     let _name = data.name;
     let types = data.types;
     let sprites = data.sprites;
     let sprites_other_official_artwork = sprites.other["official-artwork"].front_default; // [object Object]
     let img;
+    let arr = []; // let arr; -> arr is undefined
+    let p;
+    let node;
 
     console.log(`artwork data: ${sprites_other_official_artwork}` );
     
     body1 = document.getElementById("body1");
     body1.appendChild(document.createElement('br'));
-    container1 = document.getElementById("container1"); // html_body is null
+    node = document.getElementById("container1"); // html_body is null
     
     // `string` = template literal, template string
     // Name
-    let node = container1.appendChild(document.createElement('h1')); // argument 1 is not an object, https://stackoverflow.com/questions/38277713/argument-1-of-node-appendchild-is-not-an-object-when-trying-to-append-basic-html
+    let h1 = node.appendChild(document.createElement('h1')); // argument 1 is not an object, https://stackoverflow.com/questions/38277713/argument-1-of-node-appendchild-is-not-an-object-when-trying-to-append-basic-html
     let pokemon_id = document.createTextNode(`Pokemon [${id}]: ${_name}`);
     
-    node.appendChild(pokemon_id);
+    h1.appendChild(pokemon_id);
     node.appendChild(document.createElement('br'));
     
     // Picture
@@ -216,11 +236,16 @@ function renderJSON(data) {
     // content = document.createTextNode(`<img src=\"${sprites_other_official_artwork}\" alt="Image of Pokemon" >`);
     
     // Types
+    p=document.createElement('p');
     types.forEach(function(element, index, array) {
         console.log(element.type);
         console.log(index);
         console.log(`type: ${element.type.name}`);
         // node.appendChild()
+        arr.push(element.type.name);
+        console.log(`arr: ${arr}`);
+        p = node.appendChild(p);
+        p.append(`type[${index}]: ${element.type.name.toUpperCase()} `);
     })
 }
 
@@ -234,24 +259,52 @@ function createAPISourceOptions(html_node_id) {
     node.innerHTML = ""; // reset
 
     title.textContent = "API source (use pokeapi if you are not running a local server): ";
-
+    // localhost
     input_node.type = "radio";
     input_node.id = "localhost";
     input_node.name = "api_source"; // define radio group: giving each of radio buttons in the group the same name 
     input_node.checked = true; // sets button selected by default
-    input_node.onclick = () => {
+    input_node.onclick = () => { // addEventLister('click', function()) is the idiomatic way to add event listener
         console.log('radio button 1 clicked!');
         selected_api_url = localhost_pokeapi_url;
         console.log(`Set api source to: ${selected_api_url}`);
     }
+
+
+    // label
     label_node.htmlFor = "localhost"; // To programmatically set the for attribute, use htmlFor.
     label_node.textContent = "localhost";
+    
+
     
     node.appendChild(title);
     node.appendChild(input_node);
     node.appendChild(label_node);
+
+    // Add option to choose different port:
+    input_node = document.createElement('input');
+    input_node.type = "number";
+    input_node.id = "port_input";
+    node.appendChild(input_node);
+
+    input_node = document.createElement('button');
+    input_node.id = "port_input_button";
+    input_node.textContent = 'Set new port';
+    input_node.addEventListener('click', () => {
+        let port = document.getElementById('port_input').value;
+        if (port === null || port === "" || port === undefined){
+            alert('Invalid port [1-65535]');
+            console.log('Invalid input');
+            console.log("typeof [port]: " + typeof port);
+            return;
+        }
+        console.log(`Chose new port: ${port}`);
+
+    });
+    node.appendChild(input_node);
     node.appendChild(br);
     
+    // pokeapi
     input_node = document.createElement('input');
     input_node.type = "radio";
     input_node.id = "pokeapi";
@@ -261,6 +314,7 @@ function createAPISourceOptions(html_node_id) {
         selected_api_url = pokeapi_url;
         console.log(`Set api source to: ${selected_api_url}`);
     }
+    
     node.appendChild(input_node);
     
     label_node = document.createElement('label');
@@ -295,11 +349,12 @@ function selectAPISource(source){
     }
 }
 
-// Math.random() returns a floating point pseudo-random number where 0 < x < 1
-function getRandomInt(max){
-    return Math.floor(Math.random() * max);
+function getPokemonName(name){
+    // check if url is valid
+    let url_to_fetch = pokeapi_pokemon_url + name;
+    console.log(`fetching: ${url_to_fetch}`);
+    fetchPokeapiResponse(url_to_fetch);
 }
-
 
 function printPageTitle(title) {
     let titleDiv = document.getElementById("title");
@@ -307,11 +362,13 @@ function printPageTitle(title) {
     node.appendChild(document.createTextNode(title));
 }
 
-function getPokemonName(name){
-    // check if url is valid
-    let url_to_fetch = pokeapi_pokemon_url + name;
-    console.log(`fetching: ${url_to_fetch}`);
-    fetchPokeapiResponse(url_to_fetch);
+function createPokemonTypeStyle(){
+    
+}
+
+// Math.random() returns a floating point pseudo-random number where 0 < x < 1
+function getRandomInt(max){
+    return Math.floor(Math.random() * max);
 }
 
 function clearHTML(node) {
@@ -326,6 +383,13 @@ function clearNodeById(Id) {
     node.innerHTML = "";
 }
 
+function refreshPageEvery(seconds) {
+    
+    setInterval(() => {
+        document.location.reload();
+    }, seconds*1000);
+
+}
 
 // async/await
 // async functions allow you to avoid explicitly configure promise chaining
