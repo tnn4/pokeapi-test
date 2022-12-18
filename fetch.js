@@ -5,23 +5,23 @@
 
 // these variables can be referred to in the console (F12)
 const page_title = "Pokeapi"
-const localhost_url = "http://localhost";
+const localhost_endpoint = "http://localhost";
 const selected_port = 8000;
-const localhost_port_url = localhost_url + `:${selected_port}`;
+const localhost_port_endpoint = localhost_endpoint + `:${selected_port}`;
 
-const localhost_pokeapi_url = localhost_port_url + "/api/v2";
+const localhost_pokeapi_endpoint = localhost_port_endpoint + "/api/v2";
 
-const localhost_pokeapi_pokemon_url = localhost_port_url + "/api/v2/pokemon/";
+const localhost_pokeapi_pokemon_endpoint = localhost_port_endpoint + "/api/v2/pokemon/";
 
-const pokeapi_url = "https://pokeapi.co/api/v2";
+const pokeapi_endpoint = "https://pokeapi.co/api/v2";
 // "https://pokeapi.co/api/v2/pokemon/{id or name}/";\
-const pokeapi_pokemon_url = "https://pokeapi.co/api/v2/pokemon/";
+const pokeapi_pokemon_endpoint = "https://pokeapi.co/api/v2/pokemon/";
 
-const maxDexNumber = 905;
-const pseudoLegendaries = ["dragonite", "tyranitar", "salamence", "metagross", "garchomp", "hydreigon", "goodra", "kommo-o", "dragapult"];
+const dex_number_max = 905;
+const pseudo_legendaries = ["dragonite", "tyranitar", "salamence", "metagross", "garchomp", "hydreigon", "goodra", "kommo-o", "dragapult"];
 
-const pokeapi_pokemon_tyranitar_url = "https://pokeapi.co/api/v2/pokemon/tyranitar/";
-const localhost_pokemon_hydreigon_url = "http://localhost:8000/api/v2/pokemon/hydreigon/";
+const endpoint_remote_tyranitar = "https://pokeapi.co/api/v2/pokemon/tyranitar/";
+const endpoint_local_hydreigon = "http://localhost:8000/api/v2/pokemon/hydreigon/";
 
 const api_url = [localhost_pokeapi_url, pokeapi_url];
 const type_color = {
@@ -48,7 +48,7 @@ const type_color = {
 // Refer to promisifying functions
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-var selected_api_url = localhost_pokeapi_url;
+var selected_endpoint = localhost_pokeapi_endpoint;
 
 // RUN
 main();
@@ -61,17 +61,18 @@ function main() {
 
     // Figure out how to cache responses
     let pokeapi_response;
+    let pokeapi_endpoint = "https://pokeapi.co/api/v2";
     let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(maxDexNumber);
     let localhost_pokemon_random_url = localhost_pokeapi_url + "/pokemon" + `/${getRandomInt(maxDexNumber)}`;
     let url_to_fetch;
 
     printPageTitle(page_title);
-    createAPISourceOptions("api_source");
-    getAPISourceChoice("api_source");
+    createAPIEndpointOptions("api_source");
+    get_API_Endpoint_Choice("api_source");
 
     clearNodeById("container1");
 
-    pokeapi_response = fetchPokeapiResponse(localhost_pokemon_random_url);
+    pokeapi_response = get_pokeapi_response(localhost_pokemon_random_url);
     
     console.log( "typeof pokeapi_response: " + typeof pokeapi_response );
 }
@@ -84,34 +85,39 @@ function fetchPokemonButton() {
     let selected_pokemon;
     let url_to_fetch;
     // get api source
-    selected_button = getAPISourceChoice("api_source");
+    selected_button = get_API_Endpoint_Choice("api_source");
     // selected_api = selectAPISource(selected_button);
     // console.log(`selected_api: ${selected_api}`);
     
     // fetch pokemon from source
-    // fetchPokeapiResponse(url);
+    // get_pokeapi_response(url);
     selected_pokemon = document.getElementById("selected_pokemon").value;
     console.log(`selected_pokemon: ${selected_pokemon}`);
     if (selected_pokemon === "" || selected_pokemon === undefined || selected_pokemon === null) {
         fetchRandomPokemon();
         return;
     }
-    url_to_fetch = selected_api_url + '/pokemon' + '/' + selected_pokemon;
+    url_to_fetch = selected_endpoint + '/pokemon' + '/' + selected_pokemon;
     console.log(`url_to_fetch: ${url_to_fetch}`);
-    fetchPokeapiResponse(url_to_fetch);
+    get_pokeapi_response(url_to_fetch);
 }
 
-function fetchRandomPokemon() {
+function get_random_pokemon() {
     let pokeapi_response;
     let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(maxDexNumber);
-    let localhost_pokemon_random_url = localhost_pokeapi_url + "/pokemon" + `/${getRandomInt(maxDexNumber)}`;
+    let localhost_pokemon_random_url = localhost_pokeendpoint + "/pokemon" + `/${getRandomInt(maxDexNumber)}`;
     let url_to_fetch;
     clearNodeById("container1");
-
-    pokeapi_response = fetchPokeapiResponse(localhost_pokemon_random_url);
+    console.log(`[selected_endpoint]: ${selected_endpoint}`);
+    if (selected_endpoint == pokeapi_pokemon_url ) {
+        pokeapi_response = get_pokeapi_response(pokeapi_pokemon_random_url);
+    } else {
+        pokeapi_response = get_pokeapi_response(localhost_pokemon_random_url);
+    }
+    
 }
 
-function fetchPokemonToButton(node_id){
+function get_pokemon_up_to_dex(node_id){
     
     
     let dex_number = document.getElementById(node_id).value;
@@ -133,7 +139,7 @@ function fetchPokemonTo(dex_number) {
         //console.log("ERROR: Number required");
         //dex_number = 5;
     //}
-    let localhost_pokemon_url = localhost_pokeapi_url + "/pokemon";
+    let localhost_pokemon_url = localhost_pokeendpoint + "/pokemon";
     let url_to_fetch;
     let pokeapi_response;
     const j = 5;
@@ -141,9 +147,9 @@ function fetchPokemonTo(dex_number) {
     // ERROR: fetch is async
     for (let i=0 ; i < dex_number; i++) {
         // main();
-        url_to_fetch = localhost_pokeapi_url+ "/pokemon/" + `${i+1}`;
+        url_to_fetch = localhost_pokeendpoint+ "/pokemon/" + `${i+1}`;
         console.log(`url_to_fetch: ${url_to_fetch}`);
-        pokeapi_response = fetchPokeapiResponse(url_to_fetch);
+        pokeapi_response = get_pokeapi_response(url_to_fetch);
         console.log(i);
     }
 
@@ -151,13 +157,13 @@ function fetchPokemonTo(dex_number) {
     for(let i=0; i<dex_number; i++) {
         url_to_fetch = localhost_pokeapi_pokemon_url+`${i+1}`;
         // console.log(`fetching: ${url_to_fetch} `);
-        fetchPokeapiResponse(url_to_fetch); // this errors because it is an async function
+        get_pokeapi_response(url_to_fetch); // this errors because it is an async function
     }
     */
 }
 
 // REMEMBER promises are always async
-function fetchPokeapiResponse( pokemon_url ) {
+function get_pokeapi_response( pokemon_url ) {
     /*
     if (pokemon_url.slice(-1) !== "/") {
         pokemon_url = pokemon_url + "/";
@@ -249,7 +255,7 @@ function renderJSON(data) {
     })
 }
 
-function createAPISourceOptions(html_node_id) {
+function createAPIEndpointOptions(html_node_id) {
     // refer: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/radio
     let node = document.getElementById(html_node_id);
     let br = document.createElement('br');
@@ -266,8 +272,8 @@ function createAPISourceOptions(html_node_id) {
     input_node.checked = true; // sets button selected by default
     input_node.onclick = () => { // addEventLister('click', function()) is the idiomatic way to add event listener
         console.log('radio button 1 clicked!');
-        selected_api_url = localhost_pokeapi_url;
-        console.log(`Set api source to: ${selected_api_url}`);
+        selected_endpoint = localhost_pokeapi_url;
+        console.log(`Set api endpoint to: ${selected_api_endpoint}`);
     }
 
 
@@ -304,15 +310,15 @@ function createAPISourceOptions(html_node_id) {
     node.appendChild(input_node);
     node.appendChild(br);
     
-    // pokeapi
+    // set endpoint to pokeapi
     input_node = document.createElement('input');
     input_node.type = "radio";
     input_node.id = "pokeapi";
     input_node.name = "api_source";
     input_node.onclick = function testRadio(){ // Function expressions in JavaScript are not hoisted, unlike function declarations. You can't use function expressions before you create them: 
         console.log('radio button 2 clicked!');
-        selected_api_url = pokeapi_url;
-        console.log(`Set api source to: ${selected_api_url}`);
+        selected_api_endpoint = pokeapi_url;
+        console.log(`Set api source to: ${selected_api_endpoint}`);
     }
     
     node.appendChild(input_node);
@@ -323,7 +329,7 @@ function createAPISourceOptions(html_node_id) {
     node.appendChild(label_node);
 }
 
-function getAPISourceChoice(name) {
+function get_API_Endpoint_Choice(name) {
     let ele = document.getElementsByName(name);
     let selected_button;
     //let node;
@@ -353,7 +359,7 @@ function getPokemonName(name){
     // check if url is valid
     let url_to_fetch = pokeapi_pokemon_url + name;
     console.log(`fetching: ${url_to_fetch}`);
-    fetchPokeapiResponse(url_to_fetch);
+    get_pokeapi_response(url_to_fetch);
 }
 
 function printPageTitle(title) {
