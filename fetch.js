@@ -2,7 +2,7 @@
 
 
 // DATA
-
+// NOTE: avoid using global variables if they're not constant
 // these variables can be referred to in the console (F12)
 const page_title = "Pokeapi"
 const localhost_endpoint = "http://localhost";
@@ -24,7 +24,7 @@ const endpoint_remote_tyranitar = "https://pokeapi.co/api/v2/pokemon/tyranitar/"
 const endpoint_local_hydreigon = "http://localhost:8000/api/v2/pokemon/hydreigon/";
 
 
-const type_color = {
+const type_color_list = {
     normal: 'a8a878',
     fighting: 'c03028',
     ground: 'e0c068',
@@ -70,7 +70,7 @@ function main() {
 
     clearNodeById("container1");
     
-    console.log( "typeof pokeapi_response: " + typeof pokeapi_response );
+    // console.log( "typeof pokeapi_response: " + typeof pokeapi_response );
 }
 
 function fetchPokemonButton() {
@@ -100,8 +100,9 @@ function fetchPokemonButton() {
 
 function get_random_pokemon() {
     let pokeapi_response;
-    let pokeapi_pokemon_random_endpoint = pokeapi_pokemon_endpoint + getRandomInt(dex_number_max);
-    let localhost_pokemon_random_endpoint = localhost_port_endpoint + "/pokemon" + `/${getRandomInt(dex_number_max)}`;
+    let dex_num = getRandomInt(dex_number_max);
+    let pokeapi_pokemon_random_endpoint = pokeapi_pokemon_endpoint + dex_num;
+    let localhost_pokemon_random_endpoint = localhost_port_endpoint + "/pokemon" + dex_num;
     
     clearNodeById("container1");
 
@@ -186,7 +187,7 @@ function get_pokeapi_response( endpoint ) {
             */
         })
         .then( (data) => {
-            renderJSON(data);
+            render_pokemon(data);
         })
         .catch( (error) => {
             console.log(`ERROR: ${error}`);
@@ -195,7 +196,7 @@ function get_pokeapi_response( endpoint ) {
     // return response; WRONG You want to return the previous object, https://stackoverflow.com/questions/50607760/reactjs-typeerror-object-is-undefined
 }
 
-function renderJSON(data) {
+function render_pokemon(data) {
     console.log("data: " + data);
     console.log(`== Successfully retrieved: ${data.name.toUpperCase()} ==`);
     
@@ -208,40 +209,49 @@ function renderJSON(data) {
     let arr = []; // let arr; -> arr is undefined
     let p;
     let node;
+    let type_color;
 
     console.log(`artwork data: ${sprites_other_official_artwork}` );
     
-    body1 = document.getElementById("body1");
+    let body1 = document.getElementById("body1");
     body1.appendChild(document.createElement('br'));
     node = document.getElementById("container1"); // html_body is null
     
     // `string` = template literal, template string
-    // Name
+    // [Pokemon]
+    // [[Name]]
     let h1 = node.appendChild(document.createElement('h1')); // argument 1 is not an object, https://stackoverflow.com/questions/38277713/argument-1-of-node-appendchild-is-not-an-object-when-trying-to-append-basic-html
     let pokemon_id = document.createTextNode(`Pokemon [${id}]: ${_name}`);
     
     h1.appendChild(pokemon_id);
     node.appendChild(document.createElement('br'));
     
-    // Picture
+    // [[Picture]]
     img = document.createElement('img');
     // <img src="pic_trulli.jpg" alt="Italian Trulli"></img>
     img.src = sprites_other_official_artwork;
     node.appendChild(img);
     // content = document.createTextNode(`<img src=\"${sprites_other_official_artwork}\" alt="Image of Pokemon" >`);
     
-    // Types
+    // [[Types]]
     p=document.createElement('p');
     types.forEach(function(element, index, array) {
-        console.log(element.type);
-        console.log(index);
-        console.log(`type: ${element.type.name}`);
+        console.log(`[index] ${index}`);
+        console.log(`[api_type]: ${element.type}`);
+        console.log(`[type.name]: ${element.type.name}`);
         // node.appendChild()
+        
+        type_color = '#' + type_color_list[element.type.name];
+        console.log(`[type_color]: ${type_color}`);
+
         arr.push(element.type.name);
         console.log(`arr: ${arr}`);
-        p = node.appendChild(p);
+        p = node.appendChild(document.createElement('p')); // appendchild returns the newly appended node
+        p.style.color = type_color;
         p.append(`type[${index}]: ${element.type.name.toUpperCase()} `);
     })
+
+    // [Pokedex Entry]
 }
 
 function createAPIEndpointOptions(html_node_id) {
