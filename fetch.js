@@ -23,7 +23,7 @@ const pseudo_legendaries = ["dragonite", "tyranitar", "salamence", "metagross", 
 const endpoint_remote_tyranitar = "https://pokeapi.co/api/v2/pokemon/tyranitar/";
 const endpoint_local_hydreigon = "http://localhost:8000/api/v2/pokemon/hydreigon/";
 
-const api_url = [localhost_pokeapi_url, pokeapi_url];
+
 const type_color = {
     normal: 'a8a878',
     fighting: 'c03028',
@@ -62,23 +62,19 @@ function main() {
     // Figure out how to cache responses
     let pokeapi_response;
     let pokeapi_endpoint = "https://pokeapi.co/api/v2";
-    let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(maxDexNumber);
-    let localhost_pokemon_random_url = localhost_pokeapi_url + "/pokemon" + `/${getRandomInt(maxDexNumber)}`;
-    let url_to_fetch;
+    getRandomInt(dex_number_max);
 
     printPageTitle(page_title);
     createAPIEndpointOptions("api_source");
     get_API_Endpoint_Choice("api_source");
 
     clearNodeById("container1");
-
-    pokeapi_response = get_pokeapi_response(localhost_pokemon_random_url);
     
     console.log( "typeof pokeapi_response: " + typeof pokeapi_response );
 }
 
 function fetchPokemonButton() {
-    // debounce
+    // TODO: debounce
     
     let selected_button;
     let selected_api;
@@ -104,15 +100,20 @@ function fetchPokemonButton() {
 
 function get_random_pokemon() {
     let pokeapi_response;
-    let pokeapi_pokemon_random_url = pokeapi_pokemon_url + getRandomInt(maxDexNumber);
-    let localhost_pokemon_random_url = localhost_pokeendpoint + "/pokemon" + `/${getRandomInt(maxDexNumber)}`;
-    let url_to_fetch;
+    let pokeapi_pokemon_random_endpoint = pokeapi_pokemon_endpoint + getRandomInt(dex_number_max);
+    let localhost_pokemon_random_endpoint = localhost_port_endpoint + "/pokemon" + `/${getRandomInt(dex_number_max)}`;
+    
     clearNodeById("container1");
+
     console.log(`[selected_endpoint]: ${selected_endpoint}`);
-    if (selected_endpoint == pokeapi_pokemon_url ) {
-        pokeapi_response = get_pokeapi_response(pokeapi_pokemon_random_url);
+    console.log(`[pokeapi_pokemon_random_endpoint]: ${pokeapi_pokemon_random_endpoint}`);
+    if (selected_endpoint === pokeapi_endpoint ) {
+        console.log(`[selected_endpoint]: ${selected_endpoint}`);
+        pokeapi_response = get_pokeapi_response(pokeapi_pokemon_random_endpoint);
     } else {
-        pokeapi_response = get_pokeapi_response(localhost_pokemon_random_url);
+        console.log('ELSE');
+        console.log(`[selected_endpoint]: ${selected_endpoint}`);
+        pokeapi_response = get_pokeapi_response(localhost_pokemon_random_endpoint);
     }
     
 }
@@ -153,27 +154,17 @@ function fetchPokemonTo(dex_number) {
         console.log(i);
     }
 
-    /*
-    for(let i=0; i<dex_number; i++) {
-        url_to_fetch = localhost_pokeapi_pokemon_url+`${i+1}`;
-        // console.log(`fetching: ${url_to_fetch} `);
-        get_pokeapi_response(url_to_fetch); // this errors because it is an async function
-    }
-    */
+
 }
 
 // REMEMBER promises are always async
-function get_pokeapi_response( pokemon_url ) {
-    /*
-    if (pokemon_url.slice(-1) !== "/") {
-        pokemon_url = pokemon_url + "/";
-    }
-    */
+function get_pokeapi_response( endpoint ) {
+
     const requestOptions = {
         //mode: "no-cors",
     }
     
-    console.log(`attempting to fetch from: ${pokemon_url}`);
+    console.log(`attempting to fetch from: ${endpoint}}`);
 
     // response object contains a representation of the entire HTTP response
     // that is why you have to access its json method
@@ -183,16 +174,14 @@ function get_pokeapi_response( pokemon_url ) {
     // a promise is a returned object to which you attach callbacks
     // you can rewrite promise chains with async functions
     // () => x is short for () => {return x; }
-    return fetch( pokemon_url )
+    return fetch( endpoint )
         .then( (response) => {
             console.log(`Response: ${response}`);
             console.log(`response status: ${response.status}`);
             return response.json(); // WRONG response.json(); RIGHT return response.json() <-- this needs to be returned
             /*
             Normally, you do something like this:
-
             fetch(...).then(r => r.json()).then(console.log);
-
             which implicitly returns r.json(), but since you're using () => { ... }, you need to explicitly return. 
             */
         })
@@ -265,15 +254,15 @@ function createAPIEndpointOptions(html_node_id) {
     node.innerHTML = ""; // reset
 
     title.textContent = "API source (use pokeapi if you are not running a local server): ";
-    // localhost
+    // Set endpoint to localhost
     input_node.type = "radio";
     input_node.id = "localhost";
     input_node.name = "api_source"; // define radio group: giving each of radio buttons in the group the same name 
     input_node.checked = true; // sets button selected by default
     input_node.onclick = () => { // addEventLister('click', function()) is the idiomatic way to add event listener
         console.log('radio button 1 clicked!');
-        selected_endpoint = localhost_pokeapi_url;
-        console.log(`Set api endpoint to: ${selected_api_endpoint}`);
+        selected_endpoint = localhost_pokeapi_endpoint;
+        console.log(`Set api endpoint to: ${selected_endpoint}`);
     }
 
 
@@ -287,7 +276,7 @@ function createAPIEndpointOptions(html_node_id) {
     node.appendChild(input_node);
     node.appendChild(label_node);
 
-    // Add option to choose different port:
+    // Select new port
     input_node = document.createElement('input');
     input_node.type = "number";
     input_node.id = "port_input";
@@ -299,12 +288,12 @@ function createAPIEndpointOptions(html_node_id) {
     input_node.addEventListener('click', () => {
         let port = document.getElementById('port_input').value;
         if (port === null || port === "" || port === undefined){
-            alert('Invalid port [1-65535]');
+            alert('Invalid port. Choose: [1-65535]');
             console.log('Invalid input');
             console.log("typeof [port]: " + typeof port);
             return;
         }
-        console.log(`Chose new port: ${port}`);
+        console.log(`SET new port: ${port}`);
 
     });
     node.appendChild(input_node);
@@ -315,10 +304,10 @@ function createAPIEndpointOptions(html_node_id) {
     input_node.type = "radio";
     input_node.id = "pokeapi";
     input_node.name = "api_source";
-    input_node.onclick = function testRadio(){ // Function expressions in JavaScript are not hoisted, unlike function declarations. You can't use function expressions before you create them: 
+    input_node.onclick = function setRemoteEndpoint() { // Function expressions in JavaScript are not hoisted, unlike function declarations. You can't use function expressions before you create them: 
         console.log('radio button 2 clicked!');
-        selected_api_endpoint = pokeapi_url;
-        console.log(`Set api source to: ${selected_api_endpoint}`);
+        selected_endpoint = pokeapi_endpoint;
+        console.log(`Set api source to: ${selected_endpoint}`);
     }
     
     node.appendChild(input_node);
