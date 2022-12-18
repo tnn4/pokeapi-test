@@ -69,8 +69,23 @@ function main() {
     get_API_Endpoint_Choice("api_source");
 
     clearNodeById("container1");
-    
+    test_fetch();
     // console.log( "typeof pokeapi_response: " + typeof pokeapi_response );
+}
+
+function test_fetch() {
+    let returned_promise = get_pokeapi_response(endpoint_remote_tyranitar);
+    returned_promise
+        .then( (response) => {
+            return response.json();
+        })
+        .then( (data) => {
+            console.log(`Retrieved: ${data.name}`);
+        })
+        .catch( () => {
+            console.log("ERROR from test_fetch()");
+        }
+        )
 }
 
 function fetchPokemonButton() {
@@ -110,11 +125,11 @@ function get_random_pokemon() {
     console.log(`[pokeapi_pokemon_random_endpoint]: ${pokeapi_pokemon_random_endpoint}`);
     if (selected_endpoint === pokeapi_endpoint ) {
         console.log(`[selected_endpoint]: ${selected_endpoint}`);
-        pokeapi_response = get_pokeapi_response(pokeapi_pokemon_random_endpoint);
+        pokeapi_response = get_pokeapi_response_to_render(pokeapi_pokemon_random_endpoint, dex_num);
     } else {
         console.log('ELSE');
         console.log(`[selected_endpoint]: ${selected_endpoint}`);
-        pokeapi_response = get_pokeapi_response(localhost_pokemon_random_endpoint);
+        pokeapi_response = get_pokeapi_response_to_render(localhost_pokemon_random_endpoint, dex_num);
     }
     
 }
@@ -158,8 +173,13 @@ function fetchPokemonTo(dex_number) {
 
 }
 
+function get_pokeapi_response(endpoint, dex_number) {
+    console.log(`fetching from: ${endpoint}`);
+    return fetch( endpoint );
+}
+
 // REMEMBER promises are always async
-function get_pokeapi_response( endpoint ) {
+function get_pokeapi_response_to_render( endpoint, dex_number ) {
 
     const requestOptions = {
         //mode: "no-cors",
@@ -187,7 +207,7 @@ function get_pokeapi_response( endpoint ) {
             */
         })
         .then( (data) => {
-            render_pokemon(data);
+            render_pokemon(data, dex_number);
         })
         .catch( (error) => {
             console.log(`ERROR: ${error}`);
@@ -196,9 +216,9 @@ function get_pokeapi_response( endpoint ) {
     // return response; WRONG You want to return the previous object, https://stackoverflow.com/questions/50607760/reactjs-typeerror-object-is-undefined
 }
 
-function render_pokemon(data) {
+function render_pokemon(data, dex_number) {
     console.log("data: " + data);
-    console.log(`== Successfully retrieved: ${data.name.toUpperCase()} ==`);
+    console.log(`== [SUCCESS] retrieved: ${data.name.toUpperCase()} ==`);
     
     let id = data.id;
     let _name = data.name;
@@ -221,7 +241,7 @@ function render_pokemon(data) {
     // [Pokemon]
     // [[Name]]
     let h1 = node.appendChild(document.createElement('h1')); // argument 1 is not an object, https://stackoverflow.com/questions/38277713/argument-1-of-node-appendchild-is-not-an-object-when-trying-to-append-basic-html
-    let pokemon_id = document.createTextNode(`Pokemon [${id}]: ${_name}`);
+    let pokemon_id = document.createTextNode(`Pokemon [${id}]: ${_name}`.toUpperCase());
     
     h1.appendChild(pokemon_id);
     node.appendChild(document.createElement('br'));
@@ -251,6 +271,15 @@ function render_pokemon(data) {
         p.append(`type[${index}]: ${element.type.name.toUpperCase()} `);
     })
 
+    // [[Evolution]]
+    // Evolves to
+    // Evolves from
+    if (dex_number === null ){
+        console.log('[Warning]: No dex number information was found, unable to get evolution info');
+        return;
+    }
+    let evolution_endpoint = selected_endpoint + '/evolution-chain' + `/${dex_number}`;
+    let evolves_to = ''; // fetch
     // [Pokedex Entry]
 }
 
