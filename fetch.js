@@ -21,6 +21,7 @@ const dex_number_max = 905;
 const pseudo_legendaries = ["dragonite", "tyranitar", "salamence", "metagross", "garchomp", "hydreigon", "goodra", "kommo-o", "dragapult"];
 
 const endpoint_remote_tyranitar = "https://pokeapi.co/api/v2/pokemon/tyranitar/";
+const endpoint_remote_tyranitar_evolution = "https://pokeapi.co/api/v2/evolution-chain/tyranitar";
 const endpoint_local_hydreigon = "http://localhost:8000/api/v2/pokemon/hydreigon/";
 
 
@@ -75,6 +76,7 @@ function main() {
 
 function test_fetch() {
     let returned_promise = get_pokeapi_response(endpoint_remote_tyranitar);
+    // main pokemon info
     returned_promise
         .then( (response) => {
             return response.json();
@@ -85,7 +87,22 @@ function test_fetch() {
         .catch( () => {
             console.log("ERROR from test_fetch()");
         }
-        )
+        );
+    // evolution info
+    returned_promise = get_pokeapi_response(endpoint_remote_tyranitar_evolution);
+    returned_promise
+        .then ( (response) => {
+            console.log("Retrieving json");
+        })
+        .then ( (data) => {
+            let evolution_data = response.json();
+            evolution_data.chain.evolves_to.forEach( (element, index, array) => {
+                console.log(`[species]: ${element.species.name}`);
+                console.log(`[species_url]: ${element.species.url}`);
+            });
+            console.log(``);
+        });
+
 }
 
 function fetchPokemonButton() {
@@ -105,12 +122,12 @@ function fetchPokemonButton() {
     selected_pokemon = document.getElementById("selected_pokemon").value;
     console.log(`selected_pokemon: ${selected_pokemon}`);
     if (selected_pokemon === "" || selected_pokemon === undefined || selected_pokemon === null) {
-        fetchRandomPokemon();
+        get_random_pokemon();
         return;
     }
     url_to_fetch = selected_endpoint + '/pokemon' + '/' + selected_pokemon;
     console.log(`url_to_fetch: ${url_to_fetch}`);
-    get_pokeapi_response(url_to_fetch);
+    get_pokeapi_response_to_render(url_to_fetch);
 }
 
 function get_random_pokemon() {
@@ -156,7 +173,7 @@ function fetchPokemonTo(dex_number) {
         //console.log("ERROR: Number required");
         //dex_number = 5;
     //}
-    let localhost_pokemon_url = localhost_pokeendpoint + "/pokemon";
+    let localhost_pokemon_url = localhost_pokeapi_endpoint + "/pokemon";
     let url_to_fetch;
     let pokeapi_response;
     const j = 5;
@@ -164,7 +181,7 @@ function fetchPokemonTo(dex_number) {
     // ERROR: fetch is async
     for (let i=0 ; i < dex_number; i++) {
         // main();
-        url_to_fetch = localhost_pokeendpoint+ "/pokemon/" + `${i+1}`;
+        url_to_fetch = localhost_pokeapi_endpoint+ "/pokemon/" + `${i+1}`;
         console.log(`url_to_fetch: ${url_to_fetch}`);
         pokeapi_response = get_pokeapi_response(url_to_fetch);
         console.log(i);
@@ -175,7 +192,7 @@ function fetchPokemonTo(dex_number) {
 
 function get_pokeapi_response(endpoint, dex_number) {
     console.log(`fetching from: ${endpoint}`);
-    return fetch( endpoint );
+    return fetch( endpoint ); // returns a promise
 }
 
 // REMEMBER promises are always async
