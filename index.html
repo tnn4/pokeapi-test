@@ -17,14 +17,21 @@
     console: clear(), clears the console
     <br>
 
-
+    <!-- api endpoint selection -->
     <div id="api_source"></div>
-    
     <button onclick="get_random_pokemon()">GET Random Pokemon</button>
     <br>
+    
+    <!-- fetch data -->
     <label for="selected_pokemon">Enter pokemon or number[1-905] (random if left blank)</label>
     <input id="selected_pokemon" type="text">
     <button onclick="fetchPokemonButton()">GET Pokemon</button>
+    
+    <br>
+    <label for="evo-selection">Enter number[1-]</label>
+    <input id="evo-dex-number" type="number">
+    <button onclick="test_evo_fetch()">GET evolution data</button>
+    <br>
     <!--
     <form>
       <br>

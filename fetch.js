@@ -21,7 +21,7 @@ const dex_number_max = 905;
 const pseudo_legendaries = ["dragonite", "tyranitar", "salamence", "metagross", "garchomp", "hydreigon", "goodra", "kommo-o", "dragapult"];
 
 const endpoint_remote_tyranitar = "https://pokeapi.co/api/v2/pokemon/tyranitar/";
-const endpoint_remote_tyranitar_evolution = "https://pokeapi.co/api/v2/evolution-chain/tyranitar";
+// const endpoint_remote_tyranitar_evolution = "https://pokeapi.co/api/v2/evolution-chain/tyranitar";
 const endpoint_local_hydreigon = "http://localhost:8000/api/v2/pokemon/hydreigon/";
 
 
@@ -47,7 +47,7 @@ const type_color_list = {
 }
 
 // Refer to promisifying functions
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 var selected_endpoint = localhost_pokeapi_endpoint;
 
@@ -70,8 +70,13 @@ function main() {
     get_API_Endpoint_Choice("api_source");
 
     clearNodeById("container1");
-    test_fetch();
+    // test_fetch();
     // console.log( "typeof pokeapi_response: " + typeof pokeapi_response );
+}
+
+function force_cache() {
+    fetch("some.resource", {cache: "force-cache"})
+        .then( (response) => {/* consume the response */});
 }
 
 function test_fetch() {
@@ -84,12 +89,28 @@ function test_fetch() {
         .then( (data) => {
             console.log(`Retrieved: ${data.name}`);
         })
-        .catch( () => {
+        .catch( (error) => {
             console.log("ERROR from test_fetch()");
         }
-        );
-    // evolution info
-    returned_promise = get_pokeapi_response(endpoint_remote_tyranitar_evolution);
+    );
+}
+
+function test_evo_fetch() {
+    let returned_promise;
+
+    // retrieve value from input field
+    let selected_number = document.getElementById("evo-dex-number").value;
+    
+    if (selected_number <= 0) {
+        throw("[ERROR]: cannot enter 0 or negative values");
+    }
+    else if (selected_number === null){
+        throw("[ERROR]: null value")
+    }
+
+    let evo_data = "https://pokeapi.co/api/v2/evolution-chain" + '/' + selected_number;
+    // GET evolution info
+    returned_promise = get_pokeapi_response(evo_data);
     returned_promise
         .then ( (response) => {
             console.log("Retrieving json");
@@ -101,7 +122,10 @@ function test_fetch() {
                 console.log(`[species_url]: ${element.species.url}`);
             });
             console.log(``);
-        });
+        })
+        .catch( (error) => {
+            throw('[ERROR]: Unable to retrieve evolution data')
+        } );
 
 }
 
@@ -192,7 +216,7 @@ function fetchPokemonTo(dex_number) {
 
 function get_pokeapi_response(endpoint, dex_number) {
     console.log(`fetching from: ${endpoint}`);
-    return fetch( endpoint ); // returns a promise
+    return fetch( endpoint, {cache: "force-cache"}); // returns a promise
 }
 
 // REMEMBER promises are always async
@@ -243,7 +267,7 @@ function render_pokemon(data, dex_number) {
     let sprites = data.sprites;
     let sprites_other_official_artwork = sprites.other["official-artwork"].front_default; // [object Object]
     let img;
-    let arr = []; // let arr; -> arr is undefined
+    // let arr = []; // let arr; -> arr is undefined
     let p;
     let node;
     let type_color;
@@ -281,8 +305,8 @@ function render_pokemon(data, dex_number) {
         type_color = '#' + type_color_list[element.type.name];
         console.log(`[type_color]: ${type_color}`);
 
-        arr.push(element.type.name);
-        console.log(`arr: ${arr}`);
+        // arr.push(element.type.name);
+        // console.log(`arr: ${arr}`);
         p = node.appendChild(document.createElement('p')); // appendchild returns the newly appended node
         p.style.color = type_color;
         p.append(`type[${index}]: ${element.type.name.toUpperCase()} `);
